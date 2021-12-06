@@ -29,20 +29,18 @@
 #include <linux/kernel_stat.h>
 #include <linux/percpu.h>
 #include <linux/mutex.h>
+#include <linux/earlysuspend.h>
 /*
  * dbs is used in this file as a shortform for demandbased switching
  * It helps to keep variable names smaller, simpler
  */
 
-#define DEF_FREQUENCY_UP_THRESHOLD			(50)
-#define DEF_FREQUENCY_DOWN_THRESHOLD		(15)
-#define FREQ_STEP_DOWN 						(160000)
-static unsigned int step_down;
-#define FREQ_SLEEP_MAX 						(320000)
-static unsigned int sleep_max;
-#define FREQ_AWAKE_MIN 						(480000)
-static unsigned int awake_min;
-#define FREQ_STEP_UP_SLEEP_PERCENT 			(20)
+#define DEF_FREQUENCY_UP_THRESHOLD				(65)
+#define DEF_FREQUENCY_DOWN_THRESHOLD				(35)
+#define FREQ_STEP_DOWN 						(200000)
+#define FREQ_SLEEP_MAX 						(500000)
+#define FREQ_AWAKE_MIN 						(100000)
+#define FREQ_STEP_UP_SLEEP_PERCENT				(20)
 
 /*
  * The polling frequency of this governor depends on the capability of
@@ -59,7 +57,7 @@ unsigned int suspended = 0;
 #define MIN_SAMPLING_RATE_RATIO			(2)
 /* for correct statistics, we need at least 10 ticks between each measure */
 #define MIN_STAT_SAMPLING_RATE			\
-	(MIN_SAMPLING_RATE_RATIO * jiffies_to_usecs(CONFIG_CPU_FREQ_MIN_TICKS))
+	(MIN_SAMPLING_RATE_RATIO * jiffies_to_usecs(10))
 #define MIN_SAMPLING_RATE			\
 			(def_sampling_rate / MIN_SAMPLING_RATE_RATIO)
 #define MAX_SAMPLING_RATE			(500 * def_sampling_rate)
@@ -405,12 +403,12 @@ static void dbs_check_cpu(int cpu)
 			this_dbs_info->requested_freq = policy->max;
 		
 		//Screen off mode
-		if (suspended && this_dbs_info->requested_freq > sleep_max)
-		    this_dbs_info->requested_freq = sleep_max;
+		if (suspended && this_dbs_info->requested_freq > FREQ_SLEEP_MAX)
+		    this_dbs_info->requested_freq = FREQ_SLEEP_MAX;
 		    
 		//Screen off mode
-		if (!suspended && this_dbs_info->requested_freq < awake_min)
-		    this_dbs_info->requested_freq = awake_min;
+		if (!suspended && this_dbs_info->requested_freq < FREQ_AWAKE_MIN)
+		    this_dbs_info->requested_freq = FREQ_AWAKE_MIN;
 
 		__cpufreq_driver_target(policy, this_dbs_info->requested_freq,
 			CPUFREQ_RELATION_H);
@@ -451,7 +449,7 @@ static void dbs_check_cpu(int cpu)
 			return;
 
 		//freq_target = (dbs_tuners_ins.freq_step * policy->max) / 100;
-		freq_target = step_down; //policy->max;
+		freq_target = FREQ_STEP_DOWN; //policy->max;
 
 		/* max freq cannot be less than 100. But who knows.... */
 		if (unlikely(freq_target == 0))
@@ -467,12 +465,12 @@ static void dbs_check_cpu(int cpu)
 			this_dbs_info->requested_freq = policy->min;
 			
 		//Screen on mode
-		if (!suspended && this_dbs_info->requested_freq < awake_min)
-		    this_dbs_info->requested_freq = awake_min;
+		if (!suspended && this_dbs_info->requested_freq < FREQ_AWAKE_MIN)
+		    this_dbs_info->requested_freq = FREQ_AWAKE_MIN;
 		
 		//Screen off mode
-		if (suspended && this_dbs_info->requested_freq > sleep_max)
-		    this_dbs_info->requested_freq = sleep_max;
+		if (suspended && this_dbs_info->requested_freq > FREQ_SLEEP_MAX)
+		    this_dbs_info->requested_freq = FREQ_SLEEP_MAX;
 
 		__cpufreq_driver_target(policy, this_dbs_info->requested_freq,
 				CPUFREQ_RELATION_H);
@@ -512,10 +510,6 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 	struct cpu_dbs_info_s *this_dbs_info;
 	unsigned int j;
 	int rc;
-	unsigned int min_freq = ~0;
-	unsigned int max_freq = 0;
-	unsigned int i;	
-	struct cpufreq_frequency_table *freq_table;	
 
 	this_dbs_info = &per_cpu(cpu_dbs_info, cpu);
 
@@ -561,7 +555,7 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 				latency = 1;
 
 			def_sampling_rate = 10 * latency *
-				CONFIG_CPU_FREQ_SAMPLING_LATENCY_MULTIPLIER;
+				1000;
 
 			if (def_sampling_rate < MIN_STAT_SAMPLING_RATE)
 				def_sampling_rate = MIN_STAT_SAMPLING_RATE;
@@ -575,20 +569,6 @@ static int cpufreq_governor_dbs(struct cpufreq_policy *policy,
 		}
 
 		mutex_unlock(&dbs_mutex);
-		freq_table = cpufreq_frequency_get_table(policy->cpu);
-		for (i = 0; (freq_table[i].frequency != CPUFREQ_TABLE_END); i++) {
-			unsigned int freq = freq_table[i].frequency;
-			if (freq == CPUFREQ_ENTRY_INVALID) {
-				continue;
-			}
-			if (freq < min_freq)	
-				min_freq = freq;
-			if (freq > max_freq)
-				max_freq = freq;
-		}
-		step_down = min_freq;
-		sleep_max = min_freq;								//Minimum CPU frequency in table
-		awake_min = min_freq;								//Minimum CPU frequency in table
 		break;
 
 	case CPUFREQ_GOV_STOP:
@@ -679,4 +659,4 @@ fs_initcall(cpufreq_gov_dbs_init);
 #else
 module_init(cpufreq_gov_dbs_init);
 #endif
-module_exit(cpufreq_gov_dbs_exit); 
+module_exit(cpufreq_gov_dbs_exit);
