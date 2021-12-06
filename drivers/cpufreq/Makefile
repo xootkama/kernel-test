@@ -21,7 +21,6 @@ obj-$(CONFIG_CPU_FREQ_GOV_INTELLIACTIVE) += cpufreq_intelliactive.o
 obj-$(CONFIG_CPU_FREQ_GOV_INTERACTIVEX)	+= cpufreq_interactivex.o
 obj-$(CONFIG_CPU_FREQ_GOV_PMC)	+= cpufreq_pmc.o
 obj-$(CONFIG_CPU_FREQ_GOV_SMARTMAX)	+= cpufreq_smartmax.o
-obj-$(CONFIG_CPU_FREQ_GOV_SMARTMAX_EPS)	+= cpufreq_smartmax_eps.o
 obj-$(CONFIG_CPU_FREQ_GOV_COMMON)	+= cpufreq_governor.o
 obj-$(CONFIG_CPU_FREQ_GOV_ATTR_SET)	+= cpufreq_governor_attr_set.o
 obj-$(CONFIG_CPU_BOOST)			+= cpu-boost.o
