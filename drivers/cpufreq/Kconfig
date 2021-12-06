@@ -69,6 +69,13 @@ config CPU_FREQ_DEFAULT_GOV_PERFORMANCE
 	  Use the CPUFreq governor 'performance' as default. This sets
 	  the frequency statically to the highest frequency supported by
 	  the CPU.
+	  
+config CPU_FREQ_DEFAULT_GOV_LAGFREE
+	bool "lagfree"
+	select CPU_FREQ_GOV_LAGFREE
+	help
+	  Use the CPUFreq governor 'performance' as default. This sets
+	  the frequency statically to the highest frequency supported by
 
 config CPU_FREQ_DEFAULT_GOV_POWERSAVE
 	bool "powersave"
@@ -226,6 +233,17 @@ config CPU_FREQ_GOV_PERFORMANCE
 
 config CPU_FREQ_GOV_POWERSAVE
 	tristate "'powersave' governor"
+	help
+	  This cpufreq governor sets the frequency statically to the
+	  lowest available CPU frequency.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called cpufreq_powersave.
+
+	  If in doubt, say Y.
+	  
+ config CPU_FREQ_GOV_LAGFREE
+	tristate "'lagfree' governor"
 	help
 	  This cpufreq governor sets the frequency statically to the
 	  lowest available CPU frequency.
