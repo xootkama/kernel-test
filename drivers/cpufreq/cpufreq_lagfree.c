@@ -29,7 +29,6 @@
 #include <linux/kernel_stat.h>
 #include <linux/percpu.h>
 #include <linux/mutex.h>
-#include <linux/earlysuspend.h>
 /*
  * dbs is used in this file as a shortform for demandbased switching
  * It helps to keep variable names smaller, simpler
