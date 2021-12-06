@@ -170,6 +170,18 @@ config CPU_FREQ_DEFAULT_GOV_BIOSHOCK
  	  the screen is off. Lionheart is a conservative-based governor 
  	  which behaves more like the performance one, at the cost of
  	  battery as the scaling is very aggressive.
+	  
+config CPU_FREQ_DEFAULT_GOV_ONDEMAND_EPS
+ 	bool "ondemand"
+ 	select CPU_FREQ_GOV_ONDEMAND_EPS
+ 	help
+ 	  Default governor of BioShock kernel. CPU governor developed by
+ 	  Jamison904. A mix of ConservativeX and Lionheart. ConservativeX
+ 	  governor behaves like the Conservative governor with the added
+ 	  benefit of locking the CPU frequency to the lowest interval when
+ 	  the screen is off. Lionheart is a conservative-based governor 
+ 	  which behaves more like the performance one, at the cost of
+ 	  battery as the scaling is very aggressive.
 
 config CPU_FREQ_DEFAULT_GOV_INTERACTIVEX
 	bool "InteractiveX"
@@ -288,6 +300,23 @@ config CPU_FREQ_GOV_ONDEMAND
 
 config CPU_FREQ_GOV_INTERACTIVE
 	tristate "'interactive' cpufreq policy governor"
+	help
+	  'interactive' - This driver adds a dynamic cpufreq policy governor
+	  designed for latency-sensitive workloads.
+
+	  This governor attempts to reduce the latency of clock
+	  increases so that the system is more responsive to
+	  interactive workloads.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called cpufreq_interactive.
+
+	  For details, take a look at linux/Documentation/cpu-freq.
+
+	  If in doubt, say N.
+	  
+config CPU_FREQ_GOV_ONDEMAND_EPS
+	tristate "'ondemand' cpufreq policy governor"
 	help
 	  'interactive' - This driver adds a dynamic cpufreq policy governor
 	  designed for latency-sensitive workloads.
