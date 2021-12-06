@@ -618,6 +618,9 @@ extern struct cpufreq_governor cpufreq_gov_blu_active;
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_INTELLIACTIVE)
 extern struct cpufreq_governor cpufreq_gov_intelliactive;
 #define CPUFREQ_DEFAULT_GOVERNOR 	(&cpufreq_gov_intelliactive)
+#elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_ONDEMAND_EPS)
+extern struct cpufreq_governor cpufreq_gov_ondemand_eps;
+#define CPUFREQ_DEFAULT_GOVERNOR 	(&cpufreq_gov_ondemand_eps)
 #elif defined(CONFIG_CPU_FREQ_DEFAULT_GOV_INTERACTIVEX)
 extern struct cpufreq_governor cpufreq_gov_interactivex;
 #define CPUFREQ_DEFAULT_GOVERNOR	(&cpufreq_gov_interactivex)
